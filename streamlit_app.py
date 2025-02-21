@@ -43,11 +43,6 @@ def main():
      # Add the header image
     header_image_url = "https://raw.githubusercontent.com/ChiomaUU/Client-Prediction/refs/heads/main/ifssa_2844cc71-4dca-48ae-93c6-43295187e7ca.avif"
     st.image(header_image_url,  use_container_width=True)  # Display the image at the top
-
-
-    # Add a unique key to the button
-    if st.button("Predict", key="predict_button"):
-        st.write("Prediction logic goes here.")
     st.title("Client Return Prediction App (MVP)")
     st.write("This app predicts whether a client will return for food hampers.")
 
