@@ -42,7 +42,7 @@ def set_background(image_url):
 def main():
      # Add the header image
     header_image_url = "https://raw.githubusercontent.com/ChiomaUU/Client-Prediction/refs/heads/main/ifssa_2844cc71-4dca-48ae-93c6-43295187e7ca.avif"
-    st.image(header_image_url, use_column_width=True)  # Display the image at the top
+    st.image(header_image_url,  use_container_width=True)  # Display the image at the top
 
     # Example input fields
     age = st.number_input("Enter Age", min_value=0, max_value=100, value=30, key="age_input")
