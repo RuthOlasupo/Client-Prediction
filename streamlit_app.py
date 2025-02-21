@@ -21,8 +21,36 @@ def predict(input_data):
     else:
         return [0]  # Unlikely to return
 
+# Set the background image (optional)
+def set_background(image_url):
+    st.markdown(
+        f"""
+        <style>
+        .stApp {{
+            background-image: url("{image_url}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
 # Main function to run the app
 def main():
+     # Add the header image
+    header_image_url = "https://raw.githubusercontent.com/ChiomaUU/Client-Prediction/refs/heads/main/ifssa_2844cc71-4dca-48ae-93c6-43295187e7ca.avif"
+    st.image(header_image_url, use_column_width=True)  # Display the image at the top
+
+    # Example input fields
+    age = st.number_input("Enter Age", min_value=0, max_value=100, value=30, key="age_input")
+    income = st.number_input("Enter Income", min_value=0, value=50000, key="income_input")
+
+    # Add a unique key to the button
+    if st.button("Predict", key="predict_button"):
+        st.write("Prediction logic goes here.")
     st.title("Client Return Prediction App (MVP)")
     st.write("This app predicts whether a client will return for food hampers.")
 
@@ -57,40 +85,7 @@ def main():
 if __name__ == "__main__":
     main()
 
-import streamlit as st
 
-# Set the background image (optional)
-def set_background(image_url):
-    st.markdown(
-        f"""
-        <style>
-        .stApp {{
-            background-image: url("{image_url}");
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-        }}
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
 
-# Main function to run the app
-def main():
-    # Add the header image
-    header_image_url = "https://raw.githubusercontent.com/ChiomaUU/Client-Prediction/refs/heads/main/ifssa_2844cc71-4dca-48ae-93c6-43295187e7ca.avif"
-    st.image(header_image_url, use_column_width=True)  # Display the image at the top
 
-    # Example input fields
-    age = st.number_input("Enter Age", min_value=0, max_value=100, value=30, key="age_input")
-    income = st.number_input("Enter Income", min_value=0, value=50000, key="income_input")
-
-    # Add a unique key to the button
-    if st.button("Predict", key="predict_button"):
-        st.write("Prediction logic goes here.")
-
-# Run the app
-if __name__ == "__main__":
-    main()
 
