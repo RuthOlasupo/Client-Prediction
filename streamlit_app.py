@@ -56,3 +56,37 @@ def main():
 # Run the app
 if __name__ == "__main__":
     main()
+
+import streamlit as st
+
+# Set the background image
+def set_background(image_url):
+    st.markdown(
+        f"""
+        <style>
+        .stApp {{
+            background-image: url("{image_url}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+# Main function to run the app
+def main():
+    # Set the background image (replace with your raw GitHub URL)
+    background_url = "https://raw.githubusercontent.com/your-username/your-repo/main/background.jpg"
+    set_background(background_url)
+
+    # Add content to the app
+    st.title("Client Return Prediction App")
+    st.write("This app predicts whether a client will return for food hampers.")
+    st.write("Add your app content here.")
+
+# Run the app
+if __name__ == "__main__":
+    main()
