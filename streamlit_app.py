@@ -94,7 +94,7 @@ def set_background(image_url):
 # Main function to run the app
 def main():
     # Set the background image (replace with your raw GitHub URL)
-    background_url = "https://raw.githubusercontent.com/ChiomaUU/Client-Prediction/refs/heads/main/ifssa_2844cc71-4dca-48ae-93c6-43295187e7ca.avif"
+    background_url = "https://raw.githubusercontent.com/your-username/your-repo/main/background.jpg"
     set_background(background_url)
 
     # Add content to the app
@@ -103,9 +103,12 @@ def main():
     st.write("Add your app content here.")
 
     # Example input fields
-    age = st.number_input("Enter Age", min_value=0, max_value=100, value=30)
-    income = st.number_input("Enter Income", min_value=0, value=50000)
-    st.button("Predict")
+    age = st.number_input("Enter Age", min_value=0, max_value=100, value=30, key="age_input")
+    income = st.number_input("Enter Income", min_value=0, value=50000, key="income_input")
+
+    # Add a unique key to the button
+    if st.button("Predict", key="predict_button"):
+        st.write("Prediction logic goes here.")
 
 # Run the app
 if __name__ == "__main__":
