@@ -44,9 +44,6 @@ def main():
     header_image_url = "https://raw.githubusercontent.com/ChiomaUU/Client-Prediction/refs/heads/main/ifssa_2844cc71-4dca-48ae-93c6-43295187e7ca.avif"
     st.image(header_image_url,  use_container_width=True)  # Display the image at the top
 
-    # Example input fields
-    age = st.number_input("Enter Age", min_value=0, max_value=100, value=30, key="age_input")
-    income = st.number_input("Enter Income", min_value=0, value=50000, key="income_input")
 
     # Add a unique key to the button
     if st.button("Predict", key="predict_button"):
