@@ -23,8 +23,8 @@ def predict(input_data):
 
 # Main function to run the app
 def main():
-    st.title("Client Return Prediction App (MVP)")
-    st.write("This app predicts whether a client will return for food hampers.")
+    #st.title("Client Return Prediction App (MVP)")
+    #st.write("This app predicts whether a client will return for food hampers.")
 
     # Load the dataset
     data = load_data()
