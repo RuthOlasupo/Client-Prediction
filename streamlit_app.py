@@ -23,8 +23,8 @@ def predict(input_data):
 
 # Main function to run the app
 def main():
-    #st.title("Client Return Prediction App (MVP)")
-    #st.write("This app predicts whether a client will return for food hampers.")
+    st.title("Client Return Prediction App (MVP)")
+    st.write("This app predicts whether a client will return for food hampers.")
 
     # Load the dataset
     data = load_data()
@@ -98,9 +98,9 @@ def main():
     set_background(background_url)
 
     # Add content to the app
-    st.title("Client Return Prediction App")
-    st.write("This app predicts whether a client will return for food hampers.")
-    st.write("Add your app content here.")
+    #st.title("Client Return Prediction App")
+    #st.write("This app predicts whether a client will return for food hampers.")
+    #st.write("Add your app content here.")
 
     # Example input fields
     age = st.number_input("Enter Age", min_value=0, max_value=100, value=30, key="age_input")
