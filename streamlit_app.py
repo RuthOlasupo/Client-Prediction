@@ -66,10 +66,25 @@ def set_background(image_url):
         <style>
         .stApp {{
             background-image: url("{image_url}");
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
+            background-size: cover;  /* Ensures the image covers the entire background */
+            background-position: center;  /* Centers the image */
+            background-repeat: no-repeat;  /* Prevents the image from repeating */
+            background-attachment: fixed;  /* Makes the background image fixed while scrolling */
+        }}
+        /* Add a semi-transparent overlay to improve readability of text */
+        .stApp::before {{
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.7);  /* White overlay with 70% opacity */
+            z-index: -1;
+        }}
+        /* Ensure Streamlit components are visible */
+        .stButton>button, .stTextInput>div>div>input, .stNumberInput>div>div>input, .stSelectbox>div>div>select {{
+            background-color: rgba(255, 255, 255, 0.8) !important;  /* Slightly transparent white background for inputs */
         }}
         </style>
         """,
@@ -79,13 +94,18 @@ def set_background(image_url):
 # Main function to run the app
 def main():
     # Set the background image (replace with your raw GitHub URL)
-    background_url = "https://raw.githubusercontent.com/ChiomaUU/Client-Prediction/refs/heads/main/ifssa_2844cc71-4dca-48ae-93c6-43295187e7ca.avif"
+    background_url = "https://raw.githubusercontent.com/your-username/your-repo/main/background.jpg"
     set_background(background_url)
 
     # Add content to the app
     st.title("Client Return Prediction App")
     st.write("This app predicts whether a client will return for food hampers.")
     st.write("Add your app content here.")
+
+    # Example input fields
+    age = st.number_input("Enter Age", min_value=0, max_value=100, value=30)
+    income = st.number_input("Enter Income", min_value=0, value=50000)
+    st.button("Predict")
 
 # Run the app
 if __name__ == "__main__":
