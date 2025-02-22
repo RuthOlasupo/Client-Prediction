@@ -7,7 +7,7 @@ def load_data():
     # Create a dummy dataset
     data = pd.DataFrame({
         'age': [25, 30, 35, 40, 45],
-        'household': ['yes', 'no'],
+        'household': [0, 1],
         'previous_visits': [1, 2, 3, 4, 5],
         'returned': [1, 0, 1, 0, 1]  # Target column (1 = returned, 0 = did not return)
     })
