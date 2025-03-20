@@ -26,7 +26,8 @@ def load_data():
 
 # Define only the top 5 features
 REQUIRED_COLUMNS = [
-    "year_month_2024-08",  # One-hot encoded feature
+    "year_month_2024-08", # One-hot encoded feature
+    "year_month_2024-06"
     "total_visits",
     "avg_days_between_pickups",
     "days_since_last_pickup"
@@ -34,7 +35,7 @@ REQUIRED_COLUMNS = [
 
 # Function to preprocess input data
 def preprocess_input(input_data):
-    input_df = pd.DataFrame([input_data])
+     input_df = pd.DataFrame([input_data])
 
     # Ensure all required columns exist
     for col in REQUIRED_COLUMNS:
@@ -82,11 +83,11 @@ def powerbi_dashboard():
         """,
         height=800,
     )
-
+    
 def prediction_page():
     # Add the header image
     header_image_url = "https://raw.githubusercontent.com/ChiomaUU/Client-Prediction/refs/heads/main/ifssa_2844cc71-4dca-48ae-93c6-43295187e7ca.avif"
-    st.image(header_image_url, use_container_width=True)  # Display the image at the top
+    st.image(header_image_url, use_column_width=True)  # Display the image at the top
 
     st.title("Client Return Prediction App")
     st.write("Enter details to predict if a client will return.")
@@ -107,6 +108,7 @@ def prediction_page():
     # Prepare input data
     input_data = {
         "year_month_2024-08": 1 if year_month == "2024-08" else 0,  # One-hot encoding for year-month
+        "year_month_2024-06": 1 if year_month == "2024-06" else 0,  # One-hot encoding for year-month
         "total_visits": total_visits,
         "avg_days_between_pickups": avg_days_between_pickups,
         "days_since_last_pickup": days_since_last_pickup
@@ -118,12 +120,17 @@ def prediction_page():
             st.error("Model not loaded. Please check if 'model_top5.pkl' exists.")
         else:
             input_df = preprocess_input(input_data)
+            st.write("Processed Input Data:")
+            st.write(input_df)
+            st.write(f"Shape of Input Data: {input_df.shape}")
+
             prediction = model.predict(input_df)
             probability = model.predict_proba(input_df)
-    
+
             st.subheader("Prediction Result:")
             st.write("✅ Prediction: **Yes**" if prediction[0] == 1 else "❌ Prediction: **No**")
             st.write(f"📊 Probability (Yes): **{probability[0][1]:.4f}**")
+            st.write(f"📊 Probability (No): **{probability[0][0]:.4f}**")
             st.write(f"📊 Probability (No): **{probability[0][0]:.4f}**")
 
 # Main function to handle multi-page navigation
