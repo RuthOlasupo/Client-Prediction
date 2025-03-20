@@ -24,14 +24,14 @@ def load_data():
         st.error(f"Error loading data: {e}")
         return None
 
-# Define only the top 5 features
+    # Define only the top 5 features
 REQUIRED_COLUMNS = [
-    "year_month_2024-08", # One-hot encoded feature
-    "year_month_2024-06"
-    "total_visits",
-    "avg_days_between_pickups",
-    "days_since_last_pickup"
-]
+        "year_month_2024-08", # One-hot encoded feature
+        "year_month_2024-06"
+        "total_visits",
+        "avg_days_between_pickups",
+        "days_since_last_pickup"
+    ]
 
 # Function to preprocess input data
 def preprocess_input(input_data):
