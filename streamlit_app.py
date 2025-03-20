@@ -83,11 +83,11 @@ def powerbi_dashboard():
         """,
         height=800,
     )
-    
+
 def prediction_page():
     # Add the header image
     header_image_url = "https://raw.githubusercontent.com/ChiomaUU/Client-Prediction/refs/heads/main/ifssa_2844cc71-4dca-48ae-93c6-43295187e7ca.avif"
-    st.image(header_image_url, use_column_width=True)  # Display the image at the top
+    st.image(header_image_url, use_container_width=True)  # Updated parameter
 
     st.title("Client Return Prediction App")
     st.write("Enter details to predict if a client will return.")
@@ -130,7 +130,6 @@ def prediction_page():
             st.subheader("Prediction Result:")
             st.write("✅ Prediction: **Yes**" if prediction[0] == 1 else "❌ Prediction: **No**")
             st.write(f"📊 Probability (Yes): **{probability[0][1]:.4f}**")
-            st.write(f"📊 Probability (No): **{probability[0][0]:.4f}**")
             st.write(f"📊 Probability (No): **{probability[0][0]:.4f}**")
 
 # Main function to handle multi-page navigation
