@@ -119,7 +119,7 @@ def prediction_page():
         if model is None:
             st.error("Model not loaded. Please check if 'model_top5.pkl' exists.")
         else:
-             st.write(f"Model Expected Features: {model.n_features_in_}")
+            st.write(f"Model Expected Features: {model.n_features_in_}")
             input_df = preprocess_input(input_data)
             st.write("Processed Input Data:")
             st.write(input_df)
