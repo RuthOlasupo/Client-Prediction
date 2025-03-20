@@ -35,7 +35,7 @@ REQUIRED_COLUMNS = [
 
 # Function to preprocess input data
 def preprocess_input(input_data):
-     input_df = pd.DataFrame([input_data])
+    input_df = pd.DataFrame([input_data])
 
     # Ensure all required columns exist
     for col in REQUIRED_COLUMNS:
