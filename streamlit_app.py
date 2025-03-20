@@ -29,8 +29,7 @@ REQUIRED_COLUMNS = [
     "year_month_2024-08",  # One-hot encoded feature
     "total_visits",
     "avg_days_between_pickups",
-    "days_since_last_pickup",
-    "year_month_2024-06"
+    "days_since_last_pickup"
 ]
 
 # Function to preprocess input data
