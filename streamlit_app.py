@@ -125,6 +125,11 @@ def prediction_page():
             st.write(input_df)
             st.write(f"Shape of Input Data: {input_df.shape}")
             st.write(f"Columns in Input Data: {input_df.columns.tolist()}")
+            st.write(f"Model was trained on {model.n_features_in_} features.")
+            st.write(f"Features in training data: {model.feature_names_in_}")
+            st.write(f"Columns in input data: {input_df.columns.tolist()}")
+            st.write(f"Shape of input data: {input_df.shape}")
+
 
             prediction = model.predict(input_df)
             probability = model.predict_proba(input_df)
