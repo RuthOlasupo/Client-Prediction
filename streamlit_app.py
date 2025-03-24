@@ -107,14 +107,15 @@ def prediction_page():
     month = st.number_input("Month", min_value=1, max_value=12, step=1)
     days_since_last_pickup = st.number_input("Days Since Last Pickup", min_value=0, step=1)
 
-    # Prepare input data
+    # Prepare input data dynamically to match REQUIRED_COLUMNS
     input_data = {
-        "year_month_2024-08": 1 if year_month == "2024-08", "2025-06" else 0,  # One-hot encoding for year-month
+        "year_month_2024-08": 1 if year_month == "2024-08" else 0,
+        "year_month_2024-06": 1 if year_month == "2024-06" else 0,  # Ensure all encoded features exist
         "total_visits": total_visits,
         "avg_days_between_pickups": avg_days_between_pickups,
-        "days_since_last_pickup": days_since_last_pickup,
-        "month": month
+        "days_since_last_pickup": days_since_last_pickup
     }
+
     # Prediction button
     if st.button("Predict"):
         if model is None:
