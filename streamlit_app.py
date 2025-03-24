@@ -29,7 +29,7 @@ REQUIRED_COLUMNS = [
         "year_month_2024-08", # One-hot encoded feature
         "total_visits",
         "avg_days_between_pickups",
-        "days_since_last_pickup"
+        "days_since_last_pickup",
         "year_month_2024-06"
     ]
 
@@ -99,19 +99,21 @@ def prediction_page():
     if st.checkbox("Show raw data"):
         st.write(data)
 
-    # User input fields (matching the top 5 important features)
+     # User input fields
     year_month = st.selectbox("Year-Month", ["2024-08", "2024-07", "2024-06"])
     total_visits = st.number_input("Total Visits", min_value=1, max_value=100, step=1)
     avg_days_between_pickups = st.number_input("Avg Days Between Pickups", min_value=1.0, max_value=100.0, step=0.1)
     days_since_last_pickup = st.number_input("Days Since Last Pickup", min_value=0, step=1)
 
-    # Prepare input data
-    input_data = {
-        "year_month_2024-08": 1 if year_month == "2024-08" else 0,  # One-hot encoding for year-month
+    # One-hot encoding for year_month
+    input_data = {col: 1 if col == f"year_month_{year_month}" else 0 for col in REQUIRED_COLUMNS[:3]}
+    
+    # Add numerical inputs
+    input_data.update({
         "total_visits": total_visits,
         "avg_days_between_pickups": avg_days_between_pickups,
-        "days_since_last_pickup": days_since_last_pickup,
-    }
+        "days_since_last_pickup": days_since_last_pickup
+    })
 
     # Prediction button
     if st.button("Predict"):
