@@ -46,10 +46,6 @@ def preprocess_input(input_data):
     input_df = input_df[REQUIRED_COLUMNS]
     return input_df
     
-    st.write(f"Model was trained on {model.n_features_in_} features.")
-    st.write(f"Features in training data: {model.feature_names_in_}")
-    st.write(f"Columns in input data: {input_df.columns.tolist()}")
-    st.write(f"Shape of input data: {input_df.shape}")
 
 # Set the background image (optional)
 def set_background(image_url):
@@ -124,6 +120,8 @@ def prediction_page():
             st.error("Model not loaded. Please check if 'model_top5.pkl' exists.")
         else:
             st.write(f"Model Expected Features: {model.n_features_in_}")
+            st.write(f"Model was trained on {model.n_features_in_} features.")
+            st.write(f"Features in training data: {model.feature_names_in_}")
             input_df = preprocess_input(input_data)
             st.write("Processed Input Data:")
             st.write(input_df)
