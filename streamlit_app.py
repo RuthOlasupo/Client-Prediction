@@ -111,7 +111,7 @@ def prediction_page():
         "total_visits": total_visits,
         "avg_days_between_pickups": avg_days_between_pickups,
         "days_since_last_pickup": days_since_last_pickup,
-        "year_month_2024-06": 1 if year_month == "2024-06", else 0,  # One-hot encoding for year-month
+        "year_month_2024-06": 1 if year_month == "2024-06", else 0  # One-hot encoding for year-month
     }
     # Prediction button
     if st.button("Predict"):
