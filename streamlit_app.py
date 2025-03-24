@@ -10,7 +10,7 @@ import os
 @st.cache_resource
 def load_model():
     try:
-        return joblib.load("./best_catboost_model.pkl")  # Load the updated model
+        return joblib.load("./model_top5.pkl")  # Load the updated model
     except Exception as e:
         st.error(f"Error loading model: {e}")
         return None
@@ -104,15 +104,16 @@ def prediction_page():
     year_month = st.selectbox("Year-Month", ["2024-08", "2024-07", "2024-06"])
     total_visits = st.number_input("Total Visits", min_value=1, max_value=100, step=1)
     avg_days_between_pickups = st.number_input("Avg Days Between Pickups", min_value=1.0, max_value=100.0, step=0.1)
+    month = st.number_input("Month", min_value=1, max_value=12, step=1)
     days_since_last_pickup = st.number_input("Days Since Last Pickup", min_value=0, step=1)
 
     # Prepare input data
     input_data = {
-        "year_month_2024-08": 1 if year_month == "2024-08" else 0,  # One-hot encoding for year-month
+        "year_month_2024-08": 1 if year_month == "2024-08", "2025-06" else 0,  # One-hot encoding for year-month
         "total_visits": total_visits,
         "avg_days_between_pickups": avg_days_between_pickups,
         "days_since_last_pickup": days_since_last_pickup,
-        "year_month_2024-06": 1 if year_month == "2024-06" else 0  # One-hot encoding for year-month
+        "month": month
     }
     # Prediction button
     if st.button("Predict"):
