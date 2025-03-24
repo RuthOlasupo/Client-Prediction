@@ -10,7 +10,7 @@ import os
 @st.cache_resource
 def load_model():
     try:
-        return joblib.load("./model_top5.pkl")  # Load the updated model
+        return joblib.load("./best_catboost_model.pkl")  # Load the updated model
     except Exception as e:
         st.error(f"Error loading model: {e}")
         return None
