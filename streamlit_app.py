@@ -120,11 +120,11 @@ def prediction_page():
             st.error("Model not loaded. Please check if 'model_top5.pkl' exists.")
         else:
             st.write(f"Model Expected Features: {model.n_features_in_}")
-            st.write(f"Model was trained on {model.n_features_in_} features.")
-            st.write(f"Features in training data: {model.feature_names_in_}")
             input_df = preprocess_input(input_data)
             st.write("Processed Input Data:")
             st.write(input_df)
+            st.write(f"Model was trained on {model.n_features_in_} features.")
+            st.write(f"Features in training data: {model.feature_names_in_}")
             st.write(f"Shape of Input Data: {input_df.shape}")
             st.write(f"Columns in Input Data: {input_df.columns.tolist()}")
 
