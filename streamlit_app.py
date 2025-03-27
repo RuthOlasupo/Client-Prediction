@@ -100,21 +100,22 @@ def prediction_page():
     if st.checkbox("Show raw data"):
         st.write(data)
 
-    # User input fields (matching the top 5 important features)
-    year_month = st.selectbox("Year-Month", ["2024-08", "2024-07", "2024-06"])
+ # User inputs
+    all_months = ["2024-08", "2024-07", "2024-06"]  # Update with all months the model expects
+    year_month = st.selectbox("Year-Month", all_months)
     total_visits = st.number_input("Total Visits", min_value=1, max_value=100, step=1)
     avg_days_between_pickups = st.number_input("Avg Days Between Pickups", min_value=1.0, max_value=100.0, step=0.1)
-    month = st.number_input("Month", min_value=1, max_value=12, step=1)
     days_since_last_pickup = st.number_input("Days Since Last Pickup", min_value=0, step=1)
 
-    # Prepare input data dynamically to match REQUIRED_COLUMNS
+    # Prepare input data
     input_data = {
-        "year_month_2024-08": 1 if year_month == "2024-08" else 0,
-        "year_month_2024-06": 1 if year_month == "2024-06" else 0,  # Ensure all encoded features exist
         "total_visits": total_visits,
         "avg_days_between_pickups": avg_days_between_pickups,
         "days_since_last_pickup": days_since_last_pickup
     }
+    # Set one-hot encoded months
+    for month in all_months:
+        input_data[f"year_month_{month}"] = 1 if month == year_month else 0
 
     # Prediction button
     if st.button("Predict"):
