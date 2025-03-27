@@ -5,18 +5,24 @@ import numpy as np
 import joblib
 import os
 
+# --- Configuration ---
+st.set_page_config(layout="wide")
 
-# Load the trained model with caching
+# --- Model Loading ---
 @st.cache_resource
 def load_model():
     try:
-        return joblib.load("./model_top5.pkl")  # Load the updated model
+        model = joblib.load("./model_top5.pkl")
+        st.success("Model loaded successfully!")
+        return model
     except Exception as e:
         st.error(f"Error loading model: {e}")
         return None
 
 model = load_model()
 
+# --- Data Loading ---
+@st.cache_data
 def load_data():
     try:
         return pd.read_csv("./df.csv")
@@ -24,39 +30,14 @@ def load_data():
         st.error(f"Error loading data: {e}")
         return None
 
-    # Define only the top 5 features
-REQUIRED_COLUMNS = [
-        "year_month_2024-08", # One-hot encoded feature
-        "total_visits",
-        "avg_days_between_pickups",
-        "days_since_last_pickup",
-        "year_month_2024-06"
-    ]
-
-# Function to preprocess input data
-def preprocess_input(input_data):
-    input_df = pd.DataFrame([input_data])
-
-    # Ensure all required columns exist
-    for col in REQUIRED_COLUMNS:
-        if col not in input_df.columns:
-            input_df[col] = 0  # Set missing columns to 0
-
-    # Ensure the column order matches model training
-    input_df = input_df[REQUIRED_COLUMNS]
-    return input_df
-    
-
-# Set the background image (optional)
+# --- Background Style ---
 def set_background(image_url):
     st.markdown(
         f"""
         <style>
         .stApp {{
-            background-image: url("{image_url}");
+            background: url("{image_url}");
             background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
             background-attachment: fixed;
         }}
         </style>
@@ -64,19 +45,16 @@ def set_background(image_url):
         unsafe_allow_html=True
     )
 
+# --- Power BI Dashboard ---
 def powerbi_dashboard():
     st.title("Power BI Dashboard")
-
-    # Path to the PDF file in the repository
-    powerbi_link= "https://app.powerbi.com/view?r=eyJrIjoiMTE4Y2JiYWQtMzNhYS00NGFiLThmMDQtMmIwMDg4YTIzMjI5IiwidCI6ImUyMjhjM2RmLTIzM2YtNDljMy05ZDc1LTFjZTI4NWI1OWM3OCJ9" 
+    powerbi_link = "https://app.powerbi.com/view?r=eyJrIjoiMTE4Y2JiYWQtMzNhYS00NGFiLThmMDQtMmIwMDg4YTIzMjI5IiwidCI6ImUyMjhjM2RmLTIzM2YtNDljMy05ZDc1LTFjZTI4NWI1OWM3OCJ9"
     
-    
-    # Embed the Power BI dashboard using an iframe
     components.html(
         f"""
         <iframe
             width="100%"
-            height="1200"
+            height="800"
             src="{powerbi_link}"
             frameborder="0"
             allowFullScreen="true">
@@ -85,70 +63,120 @@ def powerbi_dashboard():
         height=800,
     )
 
+# --- Prediction Page ---
 def prediction_page():
-    # Add the header image
+    # Header Image
     header_image_url = "https://raw.githubusercontent.com/ChiomaUU/Client-Prediction/refs/heads/main/ifssa_2844cc71-4dca-48ae-93c6-43295187e7ca.avif"
-    st.image(header_image_url, use_container_width=True)  # Updated parameter
+    st.image(header_image_url, use_column_width=True)
 
     st.title("Client Return Prediction App")
-    st.write("Enter details to predict if a client will return.")
-
-    # Load the dataset
-    data = load_data()
-
-    # Display the dataset (optional)
-    if st.checkbox("Show raw data"):
-        st.write(data)
-
- # User inputs
-    all_months = ["2024-08", "2024-07", "2024-06"]  # Update with all months the model expects
-    year_month = st.selectbox("Year-Month", all_months)
-    total_visits = st.number_input("Total Visits", min_value=1, max_value=100, step=1)
-    avg_days_between_pickups = st.number_input("Avg Days Between Pickups", min_value=1.0, max_value=100.0, step=0.1)
-    days_since_last_pickup = st.number_input("Days Since Last Pickup", min_value=0, step=1)
-
-    # Prepare input data
-    input_data = {
-        "total_visits": total_visits,
-        "avg_days_between_pickups": avg_days_between_pickups,
-        "days_since_last_pickup": days_since_last_pickup
+    st.markdown("""
+    <style>
+    .big-font {
+        font-size:18px !important;
     }
-    # Set one-hot encoded months
-    for month in all_months:
-        input_data[f"year_month_{month}"] = 1 if month == year_month else 0
+    </style>
+    <p class="big-font">Enter details to predict if a client will return.</p>
+    """, unsafe_allow_html=True)
 
-    # Prediction button
-    if st.button("Predict"):
+    # Load and show data if requested
+    if st.checkbox("Show sample data"):
+        data = load_data()
+        if data is not None:
+            st.dataframe(data.head())
+
+    # --- User Inputs ---
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        # Dynamically get expected months from model features
+        month_features = [col for col in model.feature_names_in_ if col.startswith("year_month_")]
+        available_months = [col.replace("year_month_", "") for col in month_features]
+        selected_month = st.selectbox("Select Month", available_months)
+        
+        total_visits = st.number_input("Total Visits", 
+                                      min_value=1, 
+                                      max_value=100, 
+                                      value=5,
+                                      help="Total number of client visits")
+        
+    with col2:
+        avg_days = st.number_input("Average Days Between Pickups", 
+                                  min_value=1.0, 
+                                  max_value=100.0, 
+                                  value=15.0,
+                                  step=0.5,
+                                  help="Average days between client pickups")
+        
+        days_since_last = st.number_input("Days Since Last Pickup", 
+                                         min_value=0, 
+                                         max_value=365,
+                                         value=30,
+                                         help="Days since client's last pickup")
+
+    # --- Prediction Logic ---
+    if st.button("Predict", type="primary"):
         if model is None:
-            st.error("Model not loaded. Please check if 'model_top5.pkl' exists.")
-        else:
-            st.write(f"Model Expected Features: {model.n_features_in_}")
-            input_df = preprocess_input(input_data)
-            st.write("Processed Input Data:")
-            st.write(input_df)
-            st.write(f"Shape of Input Data: {input_df.shape}")
-            st.write(f"Columns in Input Data: {input_df.columns.tolist()}")
-
-
+            st.error("Model failed to load. Please check the model file.")
+            return
+            
+        try:
+            # Create one-hot encoded month features
+            input_data = {
+                "total_visits": total_visits,
+                "avg_days_between_pickups": avg_days,
+                "days_since_last_pickup": days_since_last
+            }
+            
+            # Add all month features (0 for unselected)
+            for month in available_months:
+                input_data[f"year_month_{month}"] = 1 if month == selected_month else 0
+            
+            # Create DataFrame with correct feature order
+            input_df = pd.DataFrame([input_data]).reindex(columns=model.feature_names_in_, fill_value=0)
+            
+            # Debugging output
+            with st.expander("Debug Info"):
+                st.write("Model expects features:", model.feature_names_in_)
+                st.write("Input data shape:", input_df.shape)
+                st.dataframe(input_df)
+            
+            # Make prediction
             prediction = model.predict(input_df)
-            probability = model.predict_proba(input_df)
+            proba = model.predict_proba(input_df)
+            
+            # Display results
+            st.subheader("Prediction Results")
+            
+            if prediction[0] == 1:
+                st.success(f"✅ Client is LIKELY to return (probability: {proba[0][1]:.1%})")
+            else:
+                st.error(f"❌ Client is UNLIKELY to return (probability: {proba[0][0]:.1%})")
+                
+            # Show probability meter
+            st.progress(proba[0][1])
+            st.caption(f"Return probability: {proba[0][1]:.1%}")
+            
+        except Exception as e:
+            st.error(f"Prediction failed: {str(e)}")
+            st.write("Please check that all input values are valid.")
 
-            st.subheader("Prediction Result:")
-            st.write("✅ Prediction: **Yes**" if prediction[0] == 1 else "❌ Prediction: **No**")
-            st.write(f"📊 Probability (Yes): **{probability[0][1]:.4f}**")
-            st.write(f"📊 Probability (No): **{probability[0][0]:.4f}**")
-
-# Main function to handle multi-page navigation
+# --- Main App Navigation ---
 def main():
+    # Background image (optional)
+    # set_background("https://example.com/background.jpg")
+    
     st.sidebar.title("Navigation")
     page = st.sidebar.radio("Go to", ["Prediction", "Power BI Dashboard"])
-
+    
     if page == "Prediction":
         prediction_page()
     elif page == "Power BI Dashboard":
         powerbi_dashboard()
 
-# Run the app
+    # Add footer
+    st.sidebar.markdown("---")
+    st.sidebar.caption("© 2024 Client Prediction App")
+
 if __name__ == "__main__":
     main()
-
