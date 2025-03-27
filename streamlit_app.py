@@ -1,9 +1,7 @@
 import streamlit as st
 import streamlit.components.v1 as components
 import pandas as pd
-import numpy as np
 import joblib
-import os
 
 # --- Configuration ---
 st.set_page_config(layout="wide")
@@ -21,42 +19,27 @@ def load_model():
 
 model = load_model()
 
-# --- Data Loading ---
-@st.cache_data
-def load_data():
-    try:
-        return pd.read_csv("./df.csv")
-    except Exception as e:
-        st.error(f"Error loading data: {e}")
-        return None
-
-# --- Hardcoded Features (UPDATE THESE TO MATCH YOUR MODEL) ---
-REQUIRED_FEATURES = [
+# --- Define the Top 5 Features ---
+TOP_FEATURES = [
+    "year_month_2024_08",
     "total_visits",
     "avg_days_between_pickups",
-    "days_since_last_pickup"
+    "days_since_last_pickup",
+    "year_month_2024_06"
 ]
 
 # --- Prediction Page ---
 def prediction_page():
-    # Header Image
-    header_image_url = "https://raw.githubusercontent.com/ChiomaUU/Client-Prediction/refs/heads/main/ifssa_2844cc71-4dca-48ae-93c6-43295187e7ca.avif"
-    st.image(header_image_url, use_container_width=True)
-
     st.title("Client Return Prediction App")
-    st.markdown("""
-    <style>
-    .big-font {
-        font-size:18px !important;
-    }
-    </style>
-    <p class="big-font">Enter details to predict if a client will return.</p>
-    """, unsafe_allow_html=True)
+    st.write("Enter details to predict if a client will return.")
 
     # --- User Inputs ---
     col1, col2 = st.columns(2)
     
     with col1:
+        # Month selection (will be one-hot encoded)
+        month = st.selectbox("Select Month", ["2024_08", "2024_07", "2024_06"])
+        
         total_visits = st.number_input("Total Visits", 
                                      min_value=1, 
                                      max_value=100, 
@@ -69,10 +52,10 @@ def prediction_page():
                                  value=15.0,
                                  step=0.5)
         
-    days_since_last = st.number_input("Days Since Last Pickup", 
-                                    min_value=0, 
-                                    max_value=365,
-                                    value=30)
+        days_since_last = st.number_input("Days Since Last Pickup", 
+                                        min_value=0, 
+                                        max_value=365,
+                                        value=30)
 
     # --- Prediction Logic ---
     if st.button("Predict", type="primary"):
@@ -81,21 +64,22 @@ def prediction_page():
             return
             
         try:
-            # Create input data with only the required features
+            # Create one-hot encoded month features
             input_data = {
+                "year_month_2024_08": 1 if month == "2024_08" else 0,
+                "year_month_2024_06": 1 if month == "2024_06" else 0,
                 "total_visits": total_visits,
                 "avg_days_between_pickups": avg_days,
                 "days_since_last_pickup": days_since_last
             }
             
-            # Create DataFrame with exactly the required columns
-            input_df = pd.DataFrame([input_data])[REQUIRED_FEATURES]
+            # Create DataFrame with exact feature order
+            input_df = pd.DataFrame([input_data])[TOP_FEATURES]
             
             # Debugging output
             with st.expander("Debug Info"):
-                st.write("Input data shape:", input_df.shape)
                 st.write("Input features:", input_df.columns.tolist())
-                st.dataframe(input_df)
+                st.write("Input values:", input_df.values)
             
             # Make prediction
             prediction = model.predict(input_df)
@@ -103,18 +87,14 @@ def prediction_page():
             
             # Display results
             st.subheader("Prediction Results")
-            
-            if prediction[0] == 1:
-                st.success(f"✅ Client is LIKELY to return (probability: {proba[0][1]:.1%})")
-            else:
-                st.error(f"❌ Client is UNLIKELY to return (probability: {proba[0][0]:.1%})")
-                
+            result = "✅ LIKELY to return" if prediction[0] == 1 else "❌ UNLIKELY to return"
+            st.write(f"**Prediction:** {result}")
+            st.write(f"**Probability of returning:** {proba[0][1]:.1%}")
             st.progress(proba[0][1])
             
         except Exception as e:
             st.error(f"Prediction failed: {str(e)}")
-            st.write("Please check that your model expects exactly these features:")
-            st.write(REQUIRED_FEATURES)
+            st.write("Please check that your input values are valid.")
 
 # --- Power BI Dashboard ---
 def powerbi_dashboard():
@@ -143,9 +123,6 @@ def main():
         prediction_page()
     elif page == "Power BI Dashboard":
         powerbi_dashboard()
-
-    st.sidebar.markdown("---")
-    st.sidebar.caption("© 2024 Client Prediction App")
 
 if __name__ == "__main__":
     main()
