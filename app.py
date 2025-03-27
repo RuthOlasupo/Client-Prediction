@@ -112,7 +112,7 @@ def main():
         dashboard()
     elif app_page == "Infograph":
         exploratory_data_analysis()
-    elig app_page == "Power_BI_Dashboard":
+    elif app_page == "Power_BI_Dashboard":
         powerbi_dashboard()
     elif app_page == "Predictions":
         predictions_page()
