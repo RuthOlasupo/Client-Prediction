@@ -1,5 +1,4 @@
 import streamlit as st
-import streamlit.components.v1 as components
 import pandas as pd
 import joblib
 
@@ -19,110 +18,114 @@ def load_model():
 
 model = load_model()
 
-# --- Define the Top 5 Features ---
-TOP_FEATURES = [
-    "year_month_2024_08",
-    "total_visits",
-    "avg_days_between_pickups",
-    "days_since_last_pickup",
-    "year_month_2024_06"
+# --- Define All Features Expected by Model ---
+ALL_FEATURES = [
+    "year_month_2024_08",  # One-hot encoded
+    "total_visits",        # Scaled
+    "avg_days_between_pickups",  # Scaled
+    "days_since_last_pickup",    # Scaled
+    "year_month_2024_06"   # One-hot encoded
 ]
 
 # --- Prediction Page ---
 def prediction_page():
-    st.title("Client Return Prediction App")
-    st.write("Enter details to predict if a client will return.")
-
-    # --- User Inputs ---
-    col1, col2 = st.columns(2)
+    st.title("📊 Client Return Prediction")
+    st.markdown("Predict if a client will return based on their activity")
     
-    with col1:
-        # Month selection (will be one-hot encoded)
-        month = st.selectbox("Select Month", ["2024_08", "2024_07", "2024_06"])
+    # --- User Input Section ---
+    with st.form("prediction_form"):
+        st.subheader("Client Details")
         
-        total_visits = st.number_input("Total Visits", 
-                                     min_value=1, 
-                                     max_value=100, 
-                                     value=5)
+        # Month Selection
+        selected_month = st.selectbox(
+            "Month of Activity",
+            ["2024_08", "2024_07", "2024_06"],
+            help="Select the month you're evaluating"
+        )
         
-    with col2:
-        avg_days = st.number_input("Average Days Between Pickups", 
-                                 min_value=1.0, 
-                                 max_value=100.0, 
-                                 value=15.0,
-                                 step=0.5)
+        # Numerical Inputs
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            total_visits = st.number_input(
+                "Total Visits",
+                min_value=0,
+                max_value=100,
+                value=5,
+                step=1
+            )
+        with col2:
+            avg_days = st.number_input(
+                "Avg Days Between Visits",
+                min_value=0.0,
+                max_value=365.0,
+                value=15.0,
+                step=1.0
+            )
+        with col3:
+            days_since_last = st.number_input(
+                "Days Since Last Visit",
+                min_value=0,
+                max_value=365,
+                value=30,
+                step=1
+            )
         
-        days_since_last = st.number_input("Days Since Last Pickup", 
-                                        min_value=0, 
-                                        max_value=365,
-                                        value=30)
-
+        # Submit Button
+        submitted = st.form_submit_button("Predict Return Probability")
+    
     # --- Prediction Logic ---
-    if st.button("Predict", type="primary"):
-        if model is None:
-            st.error("Model failed to load. Please check the model file.")
-            return
-            
+    if submitted and model:
         try:
             # Create one-hot encoded month features
+            month_data = {
+                "year_month_2024_08": 1 if selected_month == "2024_08" else 0,
+                "year_month_2024_06": 1 if selected_month == "2024_06" else 0
+            }
+            
+            # Combine all features
             input_data = {
-                "year_month_2024_08": 1 if month == "2024_08" else 0,
-                "year_month_2024_06": 1 if month == "2024_06" else 0,
+                **month_data,
                 "total_visits": total_visits,
                 "avg_days_between_pickups": avg_days,
                 "days_since_last_pickup": days_since_last
             }
             
-            # Create DataFrame with exact feature order
-            input_df = pd.DataFrame([input_data])[TOP_FEATURES]
+            # Create DataFrame with correct feature order
+            input_df = pd.DataFrame([input_data])[ALL_FEATURES]
             
-            # Debugging output
-            with st.expander("Debug Info"):
-                st.write("Input features:", input_df.columns.tolist())
-                st.write("Input values:", input_df.values)
+            # Debug View
+            with st.expander("🔍 See what's being sent to the model"):
+                st.dataframe(input_df)
+                st.write(f"Feature count: {len(input_df.columns)}")
+                st.write(f"Feature order: {input_df.columns.tolist()}")
             
             # Make prediction
             prediction = model.predict(input_df)
             proba = model.predict_proba(input_df)
             
-            # Display results
-            st.subheader("Prediction Results")
-            result = "✅ LIKELY to return" if prediction[0] == 1 else "❌ UNLIKELY to return"
-            st.write(f"**Prediction:** {result}")
-            st.write(f"**Probability of returning:** {proba[0][1]:.1%}")
-            st.progress(proba[0][1])
+            # Display Results
+            st.subheader("🎯 Prediction Results")
+            
+            result_col, prob_col = st.columns(2)
+            with result_col:
+                if prediction[0] == 1:
+                    st.success("✅ Client WILL return")
+                else:
+                    st.error("❌ Client WON'T return")
+            
+            with prob_col:
+                st.metric(
+                    "Return Probability", 
+                    f"{proba[0][1]:.1%}",
+                    delta=f"{(proba[0][1]-0.5):+.1%}"  # Show difference from 50%
+                )
+                st.progress(proba[0][1])
             
         except Exception as e:
-            st.error(f"Prediction failed: {str(e)}")
-            st.write("Please check that your input values are valid.")
+            st.error(f"⚠️ Prediction failed: {str(e)}")
+            st.write("Please verify your model expects these features:")
+            st.write(ALL_FEATURES)
 
-# --- Power BI Dashboard ---
-def powerbi_dashboard():
-    st.title("Power BI Dashboard")
-    powerbi_link = "https://app.powerbi.com/view?r=eyJrIjoiMTE4Y2JiYWQtMzNhYS00NGFiLThmMDQtMmIwMDg4YTIzMjI5IiwidCI6ImUyMjhjM2RmLTIzM2YtNDljMy05ZDc1LTFjZTI4NWI1OWM3OCJ9"
-    
-    components.html(
-        f"""
-        <iframe
-            width="100%"
-            height="800"
-            src="{powerbi_link}"
-            frameborder="0"
-            allowFullScreen="true">
-        </iframe>
-        """,
-        height=800,
-    )
-
-# --- Main App Navigation ---
-def main():    
-    st.sidebar.title("Navigation")
-    page = st.sidebar.radio("Go to", ["Prediction", "Power BI Dashboard"])
-    
-    if page == "Prediction":
-        prediction_page()
-    elif page == "Power BI Dashboard":
-        powerbi_dashboard()
-
+# --- Run the App ---
 if __name__ == "__main__":
-    main()
+    prediction_page()
