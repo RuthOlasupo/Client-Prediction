@@ -38,6 +38,27 @@ def preprocess_input(input_data):
 def exploratory_data_analysis():
     st.subheader("Infograph of Clients")
     st.write("This page is currently not active")
+
+def powerbi_dashboard():
+    st.title("Power BI Dashboard")
+
+    # Path to the PDF file in the repository
+    powerbi_link= "https://app.powerbi.com/view?r=eyJrIjoiMTE4Y2JiYWQtMzNhYS00NGFiLThmMDQtMmIwMDg4YTIzMjI5IiwidCI6ImUyMjhjM2RmLTIzM2YtNDljMy05ZDc1LTFjZTI4NWI1OWM3OCJ9" 
+    
+    
+    # Embed the Power BI dashboard using an iframe
+    components.html(
+        f"""
+        <iframe
+            width="100%"
+            height="1200"
+            src="{powerbi_link}"
+            frameborder="0"
+            allowFullScreen="true">
+        </iframe>
+        """,
+        height=800,
+    )
     
 def predictions_page():
     # Streamlit app UI
@@ -91,6 +112,8 @@ def main():
         dashboard()
     elif app_page == "Infograph":
         exploratory_data_analysis()
+    elig app_page == "Power_BI_Dashboard":
+        powerbi_dashboard()
     elif app_page == "Predictions":
         predictions_page()
 
