@@ -20,7 +20,7 @@ REQUIRED_COLUMNS = [
     "total_visits",
     "avg_days_between_pickups",
     "days_since_last_pickup",
-     "year_month_2024-08"
+     "year_month_2024-06"
     #"month",
     #"days_since_last_pickup"
 ]
