@@ -19,8 +19,10 @@ REQUIRED_COLUMNS = [
     "year_month_2024-08",  # One-hot encoded feature
     "total_visits",
     "avg_days_between_pickups",
-    "month",
-    "days_since_last_pickup"
+    "days_since_last_pickup",
+     "year_month_2024-08"
+    #"month",
+    #"days_since_last_pickup"
 ]
 
 # Function to preprocess input data
@@ -55,9 +57,11 @@ def predictions_page():
     input_data = {
         "year_month_2024-08": 1 if year_month == "2024-08" else 0,  # One-hot encoding for year-month
         "total_visits": total_visits,
-        "avg_days_between_pickups": avg_days_between_pickups,
-        "month": month,
         "days_since_last_pickup": days_since_last_pickup,
+        "avg_days_between_pickups": avg_days_between_pickups,
+        "year_month_2024-06":  1 if year_month == "2024-06" else 0,  # One-hot encoding for year-month
+       # "month": month,
+        
     }
     
     # Prediction button
