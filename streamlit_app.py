@@ -30,12 +30,8 @@ def load_data():
         st.error(f"Error loading data: {e}")
         return None
 
-# --- Hardcoded Features ---
-# Replace these with your actual model's expected features
+# --- Hardcoded Features (UPDATE THESE TO MATCH YOUR MODEL) ---
 REQUIRED_FEATURES = [
-    "year_month_2024-08",
-    "year_month_2024-07", 
-    "year_month_2024-06",
     "total_visits",
     "avg_days_between_pickups",
     "days_since_last_pickup"
@@ -57,37 +53,26 @@ def prediction_page():
     <p class="big-font">Enter details to predict if a client will return.</p>
     """, unsafe_allow_html=True)
 
-    # Load and show data if requested
-    if st.checkbox("Show sample data"):
-        data = load_data()
-        if data is not None:
-            st.dataframe(data.head())
-
     # --- User Inputs ---
     col1, col2 = st.columns(2)
     
     with col1:
-        # Get available months from our hardcoded features
-        month_features = [col for col in REQUIRED_FEATURES if col.startswith("year_month_")]
-        available_months = [col.replace("year_month_", "") for col in month_features]
-        selected_month = st.selectbox("Select Month", available_months)
-        
         total_visits = st.number_input("Total Visits", 
-                                      min_value=1, 
-                                      max_value=100, 
-                                      value=5)
+                                     min_value=1, 
+                                     max_value=100, 
+                                     value=5)
         
     with col2:
         avg_days = st.number_input("Average Days Between Pickups", 
-                                  min_value=1.0, 
-                                  max_value=100.0, 
-                                  value=15.0,
-                                  step=0.5)
+                                 min_value=1.0, 
+                                 max_value=100.0, 
+                                 value=15.0,
+                                 step=0.5)
         
-        days_since_last = st.number_input("Days Since Last Pickup", 
-                                         min_value=0, 
-                                         max_value=365,
-                                         value=30)
+    days_since_last = st.number_input("Days Since Last Pickup", 
+                                    min_value=0, 
+                                    max_value=365,
+                                    value=30)
 
     # --- Prediction Logic ---
     if st.button("Predict", type="primary"):
@@ -96,27 +81,21 @@ def prediction_page():
             return
             
         try:
-            # Create input data with all required features
+            # Create input data with only the required features
             input_data = {
                 "total_visits": total_visits,
                 "avg_days_between_pickups": avg_days,
                 "days_since_last_pickup": days_since_last
             }
             
-            # Add month features (one-hot encoded)
-            for month in available_months:
-                input_data[f"year_month_{month}"] = 1 if month == selected_month else 0
+            # Create DataFrame with exactly the required columns
+            input_df = pd.DataFrame([input_data])[REQUIRED_FEATURES]
             
-            # Create DataFrame ensuring all required columns exist
-            input_df = pd.DataFrame([input_data])
-            
-            # Add any missing columns with default 0
-            for col in REQUIRED_FEATURES:
-                if col not in input_df.columns:
-                    input_df[col] = 0
-            
-            # Ensure correct column order
-            input_df = input_df[REQUIRED_FEATURES]
+            # Debugging output
+            with st.expander("Debug Info"):
+                st.write("Input data shape:", input_df.shape)
+                st.write("Input features:", input_df.columns.tolist())
+                st.dataframe(input_df)
             
             # Make prediction
             prediction = model.predict(input_df)
@@ -134,7 +113,26 @@ def prediction_page():
             
         except Exception as e:
             st.error(f"Prediction failed: {str(e)}")
-            st.write("Please check your input values and try again.")
+            st.write("Please check that your model expects exactly these features:")
+            st.write(REQUIRED_FEATURES)
+
+# --- Power BI Dashboard ---
+def powerbi_dashboard():
+    st.title("Power BI Dashboard")
+    powerbi_link = "https://app.powerbi.com/view?r=eyJrIjoiMTE4Y2JiYWQtMzNhYS00NGFiLThmMDQtMmIwMDg4YTIzMjI5IiwidCI6ImUyMjhjM2RmLTIzM2YtNDljMy05ZDc1LTFjZTI4NWI1OWM3OCJ9"
+    
+    components.html(
+        f"""
+        <iframe
+            width="100%"
+            height="800"
+            src="{powerbi_link}"
+            frameborder="0"
+            allowFullScreen="true">
+        </iframe>
+        """,
+        height=800,
+    )
 
 # --- Main App Navigation ---
 def main():    
