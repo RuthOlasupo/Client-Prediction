@@ -67,7 +67,7 @@ def powerbi_dashboard():
 def prediction_page():
     # Header Image
     header_image_url = "https://raw.githubusercontent.com/ChiomaUU/Client-Prediction/refs/heads/main/ifssa_2844cc71-4dca-48ae-93c6-43295187e7ca.avif"
-    st.image(header_image_url, use_column_width=True)
+    st.image(header_image_url, use_container_width=True)
 
     st.title("Client Return Prediction App")
     st.markdown("""
