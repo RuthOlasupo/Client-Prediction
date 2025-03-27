@@ -7,7 +7,7 @@ import numpy as np
 @st.cache_resource
 def load_model():
     try:
-        return joblib.load("model_top5(1).pkl")  # Load the updated model
+        return joblib.load("model_top5 (1).pkl")  # Load the updated model
     except Exception as e:
         st.error(f"Error loading model: {e}")
         return None
