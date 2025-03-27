@@ -1,7 +1,9 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import pandas as pd
 import joblib
 import numpy as np
+
 
 # Load the trained model with caching
 @st.cache_resource
