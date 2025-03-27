@@ -1,15 +1,13 @@
 import streamlit as st
-import streamlit.components.v1 as components
 import pandas as pd
 import joblib
 import numpy as np
-
 
 # Load the trained model with caching
 @st.cache_resource
 def load_model():
     try:
-        return joblib.load("model_top5 (1).pkl")  # Load the updated model
+        return joblib.load("model_top5.pkl")  # Load the updated model
     except Exception as e:
         st.error(f"Error loading model: {e}")
         return None
@@ -40,27 +38,6 @@ def preprocess_input(input_data):
 def exploratory_data_analysis():
     st.subheader("Infograph of Clients")
     st.write("This page is currently not active")
-
-def powerbi_dashboard():
-    st.title("Power BI Dashboard")
-
-    # Path to the PDF file in the repository
-    powerbi_link= "https://app.powerbi.com/view?r=eyJrIjoiMTE4Y2JiYWQtMzNhYS00NGFiLThmMDQtMmIwMDg4YTIzMjI5IiwidCI6ImUyMjhjM2RmLTIzM2YtNDljMy05ZDc1LTFjZTI4NWI1OWM3OCJ9" 
-    
-    
-    # Embed the Power BI dashboard using an iframe
-    components.html(
-        f"""
-        <iframe
-            width="100%"
-            height="1200"
-            src="{powerbi_link}"
-            frameborder="0"
-            allowFullScreen="true">
-        </iframe>
-        """,
-        height=800,
-    )
     
 def predictions_page():
     # Streamlit app UI
@@ -108,14 +85,12 @@ def dashboard():
 # Main function to control the app
 def main():
     st.sidebar.title("Navigation")
-    app_page = st.sidebar.radio("Choose a page", ["Dashboard", "Infograph", "Power BI Dashboard", "Predictions"])
+    app_page = st.sidebar.radio("Choose a page", ["Dashboard", "Infograph", "Predictions"])
 
     if app_page == "Dashboard":
         dashboard()
     elif app_page == "Infograph":
         exploratory_data_analysis()
-    elif app_page == "Power BI Dashboard":
-        powerbi_dashboard()
     elif app_page == "Predictions":
         predictions_page()
 
