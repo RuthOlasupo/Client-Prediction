@@ -49,7 +49,7 @@ def predictions_page():
     # User input fields (matching the top 5 important features)
     year_month = st.selectbox("Year-Month", ["2024-08", "2024-07", "2024-06"])
     total_visits = st.number_input("Total Visits", min_value=1, max_value=100, step=1)
-    avg_days_between_pickups = st.number_input("Avg Days Between Pickups", min_value=1.0, max_value=100.0, step=0.1
+    avg_days_between_pickups = st.number_input("Avg Days Between Pickups", min_value=1.0, max_value=100.0, step=0.1)
     #month = st.number_input("Month", min_value=1, max_value=12, step=1)
     days_since_last_pickup = st.number_input("Days Since Last Pickup", min_value=0, step=1)
     year_month = st.selectbox("Year-Month", ["2024-08", "2024-07", "2024-06"])
