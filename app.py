@@ -106,13 +106,13 @@ def dashboard():
 # Main function to control the app
 def main():
     st.sidebar.title("Navigation")
-    app_page = st.sidebar.radio("Choose a page", ["Dashboard", "Infograph", "Predictions"])
+    app_page = st.sidebar.radio("Choose a page", ["Dashboard", "Infograph", "Power BI Dashboard", "Predictions"])
 
     if app_page == "Dashboard":
         dashboard()
     elif app_page == "Infograph":
         exploratory_data_analysis()
-    elif app_page == "Power_BI_Dashboard":
+    elif app_page == "Power BI Dashboard":
         powerbi_dashboard()
     elif app_page == "Predictions":
         predictions_page()
