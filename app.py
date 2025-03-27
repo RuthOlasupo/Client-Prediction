@@ -54,13 +54,13 @@ def predictions_page():
     days_since_last_pickup = st.number_input("Days Since Last Pickup", min_value=0, step=1)
     #year_month = st.selectbox("Year-Month", ["2024-08", "2024-07", "2024-06"])
     
-    # Prepare input data
+   # Prepare input data (One-hot encoding for the 'year_month' feature)
     input_data = {
-        "year_month_2024-08": 1 if year_month == "2024-08" else 0,  # One-hot encoding for year-month
-        "total_visits": total_visits,
-        "avg_days_between_pickups": avg_days_between_pickups,
-        "days_since_last_pickup": days_since_last_pickup,
-        "year_month_2024-06":  1 if year_month == "2024-06" else 0,  # One-hot encoding for year-month
+    "year_month_2024-08": 1 if year_month == "2024-08" else 0,
+    "year_month_2024-06": 1 if year_month == "2024-06" else 0,
+    "total_visits": total_visits,
+    "avg_days_between_pickups": avg_days_between_pickups,
+    "days_since_last_pickup": days_since_last_pickup,
        # "month": month,
         
     }
