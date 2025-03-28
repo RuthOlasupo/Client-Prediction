@@ -3,6 +3,8 @@ import pandas as pd
 import joblib
 import numpy as np
 
+from streamlit_gsheets import GSheetsConnection
+
 
 
 # Access the stored Google Sheets URL from Streamlit secrets
@@ -17,17 +19,26 @@ import numpy as np
 
 # streamlit_app.py
 
+
 import streamlit as st
-from streamlit_gsheets import GSheetsConnection
+from streamlit_gsheets import gspread
 
-# Create a connection object.
-conn = st.connection("gsheets", type=GSheetsConnection)
+# Access the stored Google Sheets URL from Streamlit secrets
+spreadsheet_url = st.secrets["connections.gsheets"]["spreadsheet"]
 
-df = conn.read()
+# Connect to Google Sheets (make sure the sheet is shared with your service account)
+spreadsheet = gspread.open_by_url(spreadsheet_url)
 
-# Print results.
-for row in df.itertuples():
-    st.write(f"{row.new_client_id} has a :{row.pickup_date}:")
+# Get the first sheet (or specify sheet name)
+worksheet = spreadsheet.get_worksheet(0)
+
+# Read the sheet as a pandas DataFrame
+df = pd.DataFrame(worksheet.get_all_records())
+
+# Display the data in Streamlit
+st.write("### Google Sheets Data")
+st.dataframe(df)
+
 
 # Load the trained model with caching
 @st.cache_resource
