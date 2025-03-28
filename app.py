@@ -9,7 +9,7 @@ from PIL import Image
 def load_model():
     try:
         model = joblib.load("model_top5.pkl")  # Load the updated model
-        scaler = joblib.load("scaler.pkl")  # Load the scaler
+        scaler = joblib.load("scaler_top5.pkl")  # Load the scaler
         return model, scaler
     except Exception as e:
         st.error(f"Error loading model or scaler: {e}")
