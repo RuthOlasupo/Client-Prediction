@@ -31,11 +31,21 @@ def preprocess_input(input_data):
     # Create a DataFrame from the input dictionary
     input_df = pd.DataFrame([input_data])
 
+    # Check if 'year_month' exists in the input data
+    if 'year_month' not in input_df.columns:
+        st.error("The 'year_month' field is missing from the input data.")
+        return None
+
     # One-hot encode the 'year_month' column
-    year_month_encoded = pd.get_dummies(input_df['year_month_'], prefix='year_month')
+    try:
+        year_month_encoded = pd.get_dummies(input_df['year_month'], prefix='year_month')
+        st.write("One-hot encoded year_month:", year_month_encoded)
+    except Exception as e:
+        st.error(f"Error during one-hot encoding: {e}")
+        return None
 
     # Combine the one-hot encoded column with the rest of the features
-    input_df = pd.concat([year_month_encoded, input_df.drop(columns=['year_month_'])], axis=1)
+    input_df = pd.concat([year_month_encoded, input_df.drop(columns=['year_month'])], axis=1)
 
     # Ensure all required columns are present (add missing columns with value 0)
     for col in REQUIRED_COLUMNS:
@@ -44,6 +54,8 @@ def preprocess_input(input_data):
 
     # Reorder the columns to match the model training order
     input_df = input_df[REQUIRED_COLUMNS]
+
+    st.write("Processed input data:", input_df)
 
     return input_df
 
