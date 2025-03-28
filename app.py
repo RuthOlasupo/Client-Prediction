@@ -37,8 +37,8 @@ def preprocess_input(input_data):
 
 # Insights Page 1: Power BI Visualization
 def exploratory_data_analysis():
-    st.title("Hamper Collection Insights")
-    st.subheader("Power BI Visualization")
+    st.subheader("Hamper Collection Insights")
+    st.title("Power BI Visualization")
     powerbi_url = "https://app.powerbi.com/view?r=eyJrIjoiMTE4Y2JiYWQtMzNhYS00NGFiLThmMDQtMmIwMDg4YTIzMjI5IiwidCI6ImUyMjhjM2RmLTIzM2YtNDljMy05ZDc1LTFjZTI4NWI1OWM3OCJ9"
     st.components.v1.iframe(powerbi_url, width=800, height=600)
 
@@ -85,7 +85,7 @@ def dashboard():
     st.title("Hamper Return Prediction App")
     st.write("This app predicts whether a client will return for food hampers.")
 
-# Insights page
+# Insights Navigation
 def insights_navigation():
     if 'page' not in st.session_state:
         st.session_state.page = 1
@@ -93,8 +93,7 @@ def insights_navigation():
     # Navigation buttons
     col1, col2 = st.columns([1, 1])
     with col1:
-        # Only display the "Previous" button if not on the first page
-        if st.session_state.page > 1 and st.button("⬅️ Previous"):
+        if st.button("⬅️ Previous") and st.session_state.page > 1:
             st.session_state.page -= 1
     with col2:
         if st.button("Next ➡️"):
