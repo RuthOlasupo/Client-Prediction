@@ -19,7 +19,7 @@ model, scaler = load_model()
 
 # Define only the top 5 features
 REQUIRED_COLUMNS = [
-    "year_month_2024-08",  # One-hot encoded feature
+    "year_month",  # One-hot encoded feature
     "total_visits",
     "avg_days_between_pickups",
     "month",
@@ -59,7 +59,7 @@ def predictions_page():
     st.write("Enter details to predict if a client will return.")
 
     # User input fields (matching the top 5 important features)
-    year_month = st.selectbox("Year-Month", ["2024-08", "2024-07", "2024-06"])
+    year_month = st.selectbox("Year-Month", ["2024-08", "2024-09", "2024-10, "2024-11, "2025-12"])
     total_visits = st.number_input("Total Visits", min_value=1, max_value=100, step=1)
     avg_days_between_pickups = st.number_input("Avg Days Between Pickups", min_value=1.0, max_value=100.0, step=0.1)
     month = st.number_input("Month", min_value=1, max_value=12, step=1)
@@ -67,7 +67,7 @@ def predictions_page():
 
     # Prepare input data
     input_data = {
-        "year_month_2024-08": 1 if year_month == "2024-08" else 0,
+        "year_month": year_month,
         "total_visits": total_visits,
         "avg_days_between_pickups": avg_days_between_pickups,
         "month": month,
