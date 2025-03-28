@@ -39,7 +39,10 @@ def preprocess_input(input_data):
     return input_df
 def exploratory_data_analysis():
     st.subheader("Infograph of Clients")
-    st.write("This page is currently not active")
+    st.title("Power BI Visualization")
+    powerbi_url = "https://app.powerbi.com/view?r=eyJrIjoiMTE4Y2JiYWQtMzNhYS00NGFiLThmMDQtMmIwMDg4YTIzMjI5IiwidCI6ImUyMjhjM2RmLTIzM2YtNDljMy05ZDc1LTFjZTI4NWI1OWM3OCJ9"
+    st.components.v1.iframe(powerbi_url, width=800, height=600)
+
     
 def predictions_page():
     # Streamlit app UI
