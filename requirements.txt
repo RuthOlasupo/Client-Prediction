@@ -6,4 +6,4 @@ scikit-learn
 joblib
 numpy
 matplotlib
-pip install streamlit-gsheets
+
