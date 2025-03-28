@@ -94,7 +94,7 @@ def dashboard():
 # Main function to control the app
 def main():
     st.sidebar.title("Navigation")
-    app_page = st.sidebar.radio("Choose a page", ["Dashboard", "Infograph", "Predictions"])
+    app_page = st.sidebar.radio("Choose a page", ["Dashboard", "Insights", "Predictions"])
 
     if app_page == "Dashboard":
         dashboard()
