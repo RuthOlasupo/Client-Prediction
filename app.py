@@ -46,7 +46,7 @@ def exploratory_data_analysis():
 def shap_summary_plot():
     st.subheader("SHAP Summary Plot")
     image = Image.open("shap_summary_plot.png")
-    st.image(image, caption="SHAP Summary Plot", use_column_width=True)
+    st.image(image, caption="SHAP Summary Plot", use_container_width=True)
 
 # Predictions Page
 def predictions_page():
