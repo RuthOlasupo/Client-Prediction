@@ -37,8 +37,9 @@ def preprocess_input(input_data):
     # Ensure the column order matches model training
     input_df = input_df[REQUIRED_COLUMNS]
     return input_df
+    
 def exploratory_data_analysis():
-    st.subheader("Infograph of Clients")
+    st.subheader("Hamper Collection Insights")
     st.title("Power BI Visualization")
     powerbi_url = "https://app.powerbi.com/view?r=eyJrIjoiMTE4Y2JiYWQtMzNhYS00NGFiLThmMDQtMmIwMDg4YTIzMjI5IiwidCI6ImUyMjhjM2RmLTIzM2YtNDljMy05ZDc1LTFjZTI4NWI1OWM3OCJ9"
     st.components.v1.iframe(powerbi_url, width=800, height=600)
@@ -97,7 +98,7 @@ def main():
 
     if app_page == "Dashboard":
         dashboard()
-    elif app_page == "Infograph":
+    elif app_page == "Insights":
         exploratory_data_analysis()
     elif app_page == "Predictions":
         predictions_page()
