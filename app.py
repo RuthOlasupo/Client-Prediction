@@ -2,10 +2,7 @@ import streamlit as st
 import pandas as pd
 import joblib
 import numpy as np
-
-
-
-
+from PIL import Image
 
 # Load the trained model with caching
 @st.cache_resource
@@ -20,14 +17,9 @@ model = load_model()
 
 # Define only the top 5 features
 REQUIRED_COLUMNS = [
-    #"year_month_2024-08",  # One-hot encoded feature
     "total_visits",
-     "month",
-    "avg_days_between_pickups",
-    #"days_since_last_pickup",
-     #"year_month_2024-06"
-   
-    #"days_since_last_pickup"
+    "month",
+    "avg_days_between_pickups"
 ]
 
 # Function to preprocess input data
@@ -42,38 +34,36 @@ def preprocess_input(input_data):
     # Ensure the column order matches model training
     input_df = input_df[REQUIRED_COLUMNS]
     return input_df
-    
+
+# Insights Page 1: Power BI Visualization
 def exploratory_data_analysis():
     st.subheader("Hamper Collection Insights")
     st.title("Power BI Visualization")
     powerbi_url = "https://app.powerbi.com/view?r=eyJrIjoiMTE4Y2JiYWQtMzNhYS00NGFiLThmMDQtMmIwMDg4YTIzMjI5IiwidCI6ImUyMjhjM2RmLTIzM2YtNDljMy05ZDc1LTFjZTI4NWI1OWM3OCJ9"
     st.components.v1.iframe(powerbi_url, width=800, height=600)
 
-    
+# Insights Page 2: SHAP Summary Plot
+def shap_summary_plot():
+    st.subheader("SHAP Summary Plot")
+    image = Image.open("shap_summary_plot.png")
+    st.image(image, caption="SHAP Summary Plot", use_column_width=True)
+
+# Predictions Page
 def predictions_page():
-    # Streamlit app UI
     st.title("Hamper Return Prediction App")
     st.write("Enter details to predict if a client will return.")
-    
-    # User input fields (matching the top 5 important features)
-    #year_month = st.selectbox("Year-Month", ["2024-08", "2024-07", "2024-06"])
+
     total_visits = st.number_input("Total Visits", min_value=1, max_value=100, step=1)
     avg_days_between_pickups = st.number_input("Avg Days Between Pickups", min_value=1.0, max_value=100.0, step=0.1)
     month = st.number_input("Month", min_value=1, max_value=12, step=1)
-    #days_since_last_pickup = st.number_input("Days Since Last Pickup", min_value=0, step=1)
-    #year_month = st.selectbox("Year-Month", ["2024-08", "2024-07", "2024-06"])
-    
-   # Prepare input data (One-hot encoding for the 'year_month' feature)
+
+    # Prepare input data
     input_data = {
-    #"year_month_2024-08": 1 if year_month == "2024-08" else 0,
-    #"year_month_2024-06": 1 if year_month == "2024-06" else 0,
-    "total_visits": total_visits,
-    "avg_days_between_pickups": avg_days_between_pickups,
-    #"days_since_last_pickup": days_since_last_pickup,
-    "month": month,
-        
+        "total_visits": total_visits,
+        "avg_days_between_pickups": avg_days_between_pickups,
+        "month": month,
     }
-    
+
     # Prediction button
     if st.button("Predict"):
         if model is None:
@@ -82,19 +72,38 @@ def predictions_page():
             input_df = preprocess_input(input_data)
             prediction = model.predict(input_df)
             probability = model.predict_proba(input_df)
-    
+
             st.subheader("Prediction Result:")
             st.write("✅ Prediction: **Yes**" if prediction[0] == 1 else "❌ Prediction: **No**")
             st.write(f"📊 Probability (Yes): **{probability[0][1]:.4f}**")
             st.write(f"📊 Probability (No): **{probability[0][0]:.4f}**")
-    
+
 # Dashboard Page
 def dashboard():
     header_image_url = "https://raw.githubusercontent.com/ChiomaUU/Client-Prediction/refs/heads/main/ifssa_2844cc71-4dca-48ae-93c6-43295187e7ca.avif"
     st.image(header_image_url, use_container_width=True)  # Display the image at the top
-
     st.title("Hamper Return Prediction App")
     st.write("This app predicts whether a client will return for food hampers.")
+
+# Insights Navigation
+def insights_navigation():
+    if 'page' not in st.session_state:
+        st.session_state.page = 1
+
+    # Navigation buttons
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        if st.button("⬅️ Previous") and st.session_state.page > 1:
+            st.session_state.page -= 1
+    with col2:
+        if st.button("Next ➡️"):
+            st.session_state.page += 1
+
+    # Display the current page
+    if st.session_state.page == 1:
+        exploratory_data_analysis()
+    elif st.session_state.page == 2:
+        shap_summary_plot()
 
 # Main function to control the app
 def main():
@@ -104,7 +113,7 @@ def main():
     if app_page == "Dashboard":
         dashboard()
     elif app_page == "Insights":
-        exploratory_data_analysis()
+        insights_navigation()
     elif app_page == "Predictions":
         predictions_page()
 
