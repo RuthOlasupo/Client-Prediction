@@ -1,112 +1,84 @@
+%%writefile app.py
 import streamlit as st
 import pandas as pd
 import joblib
 import numpy as np
-from PIL import Image
 
 # Load the trained model with caching
 @st.cache_resource
 def load_model():
     try:
-        model = joblib.load("model_top5.pkl")  # Load the updated model
-        scaler = joblib.load("scaler_top5.pkl")  # Load the scaler
-        return model, scaler
+        return joblib.load("model_top5.pkl")  # Load the updated model
     except Exception as e:
-        st.error(f"Error loading model or scaler: {e}")
-        return None, None
+        st.error(f"Error loading model: {e}")
+        return None
 
-model, scaler = load_model()
+model = load_model()
 
 # Define only the top 5 features
 REQUIRED_COLUMNS = [
-    "year_month_",  # One-hot encoded feature
+    #"year_month_2024-08",  # One-hot encoded feature
     "total_visits",
+     "month",
     "avg_days_between_pickups",
-    "month",
-    "days_since_last_pickup"
+    #"days_since_last_pickup",
+     #"year_month_2024-06"
+
+    #"days_since_last_pickup"
 ]
 
 # Function to preprocess input data
 def preprocess_input(input_data):
-    # Create a DataFrame from the input dictionary
     input_df = pd.DataFrame([input_data])
 
-    # Check if 'year_month' exists in the input data
-    if 'year_month' not in input_df.columns:
-        st.error("The 'year_month' field is missing from the input data.")
-        return None
-
-    # One-hot encode the 'year_month' column
-    try:
-        year_month_encoded = pd.get_dummies(input_df['year_month'], prefix='year_month')
-        st.write("One-hot encoded year_month:", year_month_encoded)
-    except Exception as e:
-        st.error(f"Error during one-hot encoding: {e}")
-        return None
-
-    # Combine the one-hot encoded column with the rest of the features
-    input_df = pd.concat([year_month_encoded, input_df.drop(columns=['year_month'])], axis=1)
-
-    # Ensure all required columns are present (add missing columns with value 0)
+    # Ensure all required columns exist
     for col in REQUIRED_COLUMNS:
         if col not in input_df.columns:
-            input_df[col] = 0
+            input_df[col] = 0  # Set missing columns to 0
 
-    # Reorder the columns to match the model training order
+    # Ensure the column order matches model training
     input_df = input_df[REQUIRED_COLUMNS]
-
-    st.write("Processed input data:", input_df)
-
     return input_df
 
-# Insights Page 1: Power BI Visualization
 def exploratory_data_analysis():
-    st.title("Hamper Collection Insights")
-    st.header("Power BI Visualization")
+    st.subheader("Hamper Collection Insights")
+    st.title("Power BI Visualization")
     powerbi_url = "https://app.powerbi.com/view?r=eyJrIjoiMTE4Y2JiYWQtMzNhYS00NGFiLThmMDQtMmIwMDg4YTIzMjI5IiwidCI6ImUyMjhjM2RmLTIzM2YtNDljMy05ZDc1LTFjZTI4NWI1OWM3OCJ9"
     st.components.v1.iframe(powerbi_url, width=800, height=600)
 
-# Insights Page 2: SHAP Summary Plot
-def shap_summary_plot():
-    st.subheader("SHAP Summary Plot")
-    image = Image.open("shap_summary_plot.png")
-    st.image(image, caption="SHAP Summary Plot", use_container_width=True)
 
-# Predictions Page
 def predictions_page():
+    # Streamlit app UI
     st.title("Hamper Return Prediction App")
     st.write("Enter details to predict if a client will return.")
 
     # User input fields (matching the top 5 important features)
-    year_month_ = st.selectbox("Year-Month", ["2024-08", "2024-09", "2024-10", "2024-11", "2024-12"])
+    #year_month = st.selectbox("Year-Month", ["2024-08", "2024-07", "2024-06"])
     total_visits = st.number_input("Total Visits", min_value=1, max_value=100, step=1)
     avg_days_between_pickups = st.number_input("Avg Days Between Pickups", min_value=1.0, max_value=100.0, step=0.1)
     month = st.number_input("Month", min_value=1, max_value=12, step=1)
-    days_since_last_pickup = st.number_input("Days Since Last Pickup", min_value=0, step=1)
+    #days_since_last_pickup = st.number_input("Days Since Last Pickup", min_value=0, step=1)
+    #year_month = st.selectbox("Year-Month", ["2024-08", "2024-07", "2024-06"])
 
-    # Prepare input data
+   # Prepare input data (One-hot encoding for the 'year_month' feature)
     input_data = {
-        "year_month_": year_month_,
-        "total_visits": total_visits,
-        "avg_days_between_pickups": avg_days_between_pickups,
-        "month": month,
-        "days_since_last_pickup": days_since_last_pickup
+    #"year_month_2024-08": 1 if year_month == "2024-08" else 0,
+    #"year_month_2024-06": 1 if year_month == "2024-06" else 0,
+    "total_visits": total_visits,
+    "avg_days_between_pickups": avg_days_between_pickups,
+    #"days_since_last_pickup": days_since_last_pickup,
+    "month": month,
+
     }
 
     # Prediction button
     if st.button("Predict"):
-        if model is None or scaler is None:
-            st.error("Model or scaler not loaded. Please check if 'model_top5.pkl' and 'scaler.pkl' exist.")
+        if model is None:
+            st.error("Model not loaded. Please check if 'model_top5.pkl' exists.")
         else:
-            # Preprocess input data
             input_df = preprocess_input(input_data)
-
-            # Scale the input data using the loaded scaler
-            input_scaled = scaler.transform(input_df)
-
-            # Make the prediction using the scaled data
-            prediction = model.predict(input_scaled)
-            probability = model.predict_proba(input_scaled)
+            prediction = model.predict(input_df)
+            probability = model.predict_proba(input_df)
 
             st.subheader("Prediction Result:")
             st.write("✅ Prediction: **Yes**" if prediction[0] == 1 else "❌ Prediction: **No**")
@@ -117,28 +89,9 @@ def predictions_page():
 def dashboard():
     header_image_url = "https://raw.githubusercontent.com/ChiomaUU/Client-Prediction/refs/heads/main/ifssa_2844cc71-4dca-48ae-93c6-43295187e7ca.avif"
     st.image(header_image_url, use_container_width=True)  # Display the image at the top
+
     st.title("Hamper Return Prediction App")
     st.write("This app predicts whether a client will return for food hampers.")
-
-# Insights Navigation
-def insights_navigation():
-    if 'page' not in st.session_state:
-        st.session_state.page = 1
-
-    # Navigation buttons
-    col1, col2 = st.columns([1, 1])
-    with col1:
-        if st.button("⬅️ Previous") and st.session_state.page > 1:
-            st.session_state.page -= 1
-    with col2:
-        if st.button("Next ➡️"):
-            st.session_state.page += 1
-
-    # Display the current page
-    if st.session_state.page == 1:
-        exploratory_data_analysis()
-    elif st.session_state.page == 2:
-        shap_summary_plot()
 
 # Main function to control the app
 def main():
@@ -148,7 +101,7 @@ def main():
     if app_page == "Dashboard":
         dashboard()
     elif app_page == "Insights":
-        insights_navigation()
+        exploratory_data_analysis()
     elif app_page == "Predictions":
         predictions_page()
 
