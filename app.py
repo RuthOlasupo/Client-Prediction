@@ -28,14 +28,21 @@ REQUIRED_COLUMNS = [
 
 # Function to preprocess input data
 def preprocess_input(input_data):
+    # Create a DataFrame from the input dictionary
     input_df = pd.DataFrame([input_data])
 
-    # Ensure all required columns exist
+    # One-hot encode the 'year_month' column
+    year_month_encoded = pd.get_dummies(input_df['year_month'], prefix='year_month')
+
+    # Combine the one-hot encoded column with the rest of the features
+    input_df = pd.concat([year_month_encoded, input_df.drop(columns=['year_month'])], axis=1)
+
+    # Ensure all required columns are present (add missing columns with value 0)
     for col in REQUIRED_COLUMNS:
         if col not in input_df.columns:
-            input_df[col] = 0  # Set missing columns to 0
+            input_df[col] = 0
 
-    # Ensure the column order matches model training
+    # Reorder the columns to match the model training order
     input_df = input_df[REQUIRED_COLUMNS]
 
     return input_df
