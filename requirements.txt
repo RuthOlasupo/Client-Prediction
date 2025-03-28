@@ -6,4 +6,4 @@ scikit-learn
 joblib
 numpy
 matplotlib
-streamlit_gsheets
+streamlit-gsheets
