@@ -3,18 +3,19 @@ import pandas as pd
 import joblib
 import numpy as np
 
-import streamlit as st
-import pandas as pd
+
 
 # Access the stored Google Sheets URL from Streamlit secrets
 spreadsheet_url = st.secrets["connections.gsheets"]["spreadsheet"]
 
 # Read data from Google Sheets (ensure the link is a CSV exportable URL)
-df = pd.read_csv(spreadsheet_url)
+df = pd.read_csv(https://docs.google.com/spreadsheets/d/1iMtDVXtbdPXm0InGw2NYh9MKa3ixDFsUxzjFaieWGl4/edit?usp=sharing)
 
 # Display the data in Streamlit
 st.write("### Google Sheets Data")
 st.dataframe(df)
+
+
 # Load the trained model with caching
 @st.cache_resource
 def load_model():
