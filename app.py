@@ -5,20 +5,29 @@ import numpy as np
 
 
 
-import streamlit as st
-import pandas as pd
-
 # Access the stored Google Sheets URL from Streamlit secrets
-spreadsheet_url = st.secrets["connections.gsheets"]["spreadsheet"]
+#spreadsheet_url = st.secrets["connections.gsheets"]["spreadsheet"]
 
 # Read data from Google Sheets (CSV exportable URL)
-df = pd.read_csv(spreadsheet_url)
+#df = pd.read_csv(spreadsheet_url)
 
 # Display the data in Streamlit
-st.write("### Google Sheets Data")
-st.dataframe(df)
+#st.write("### Google Sheets Data")
+#st.dataframe(df)
 
+# streamlit_app.py
 
+import streamlit as st
+from streamlit_gsheets import GSheetsConnection
+
+# Create a connection object.
+conn = st.connection("gsheets", type=GSheetsConnection)
+
+df = conn.read()
+
+# Print results.
+for row in df.itertuples():
+    st.write(f"{row.new_client_id} has a :{row.pickup_date}:")
 
 # Load the trained model with caching
 @st.cache_resource
