@@ -85,7 +85,7 @@ def dashboard():
     st.title("Hamper Return Prediction App")
     st.write("This app predicts whether a client will return for food hampers.")
 
-# Insights Navigation
+# Insights page
 def insights_navigation():
     if 'page' not in st.session_state:
         st.session_state.page = 1
@@ -93,7 +93,8 @@ def insights_navigation():
     # Navigation buttons
     col1, col2 = st.columns([1, 1])
     with col1:
-        if st.button("⬅️ Previous") and st.session_state.page > 1:
+        # Only display the "Previous" button if not on the first page
+        if st.session_state.page > 1 and st.button("⬅️ Previous"):
             st.session_state.page -= 1
     with col2:
         if st.button("Next ➡️"):
