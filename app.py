@@ -16,12 +16,13 @@ model = load_model()
 
 # Define only the top 5 features
 REQUIRED_COLUMNS = [
-    "year_month_2024-08",  # One-hot encoded feature
+    #"year_month_2024-08",  # One-hot encoded feature
     "total_visits",
+     "month",
     "avg_days_between_pickups",
-    "days_since_last_pickup",
-     "year_month_2024-06"
-    #"month",
+    #"days_since_last_pickup",
+     #"year_month_2024-06"
+   
     #"days_since_last_pickup"
 ]
 
@@ -51,21 +52,21 @@ def predictions_page():
     st.write("Enter details to predict if a client will return.")
     
     # User input fields (matching the top 5 important features)
-    year_month = st.selectbox("Year-Month", ["2024-08", "2024-07", "2024-06"])
+    #year_month = st.selectbox("Year-Month", ["2024-08", "2024-07", "2024-06"])
     total_visits = st.number_input("Total Visits", min_value=1, max_value=100, step=1)
     avg_days_between_pickups = st.number_input("Avg Days Between Pickups", min_value=1.0, max_value=100.0, step=0.1)
-    #month = st.number_input("Month", min_value=1, max_value=12, step=1)
-    days_since_last_pickup = st.number_input("Days Since Last Pickup", min_value=0, step=1)
+    month = st.number_input("Month", min_value=1, max_value=12, step=1)
+    #days_since_last_pickup = st.number_input("Days Since Last Pickup", min_value=0, step=1)
     #year_month = st.selectbox("Year-Month", ["2024-08", "2024-07", "2024-06"])
     
    # Prepare input data (One-hot encoding for the 'year_month' feature)
     input_data = {
-    "year_month_2024-08": 1 if year_month == "2024-08" else 0,
-    "year_month_2024-06": 1 if year_month == "2024-06" else 0,
+    #"year_month_2024-08": 1 if year_month == "2024-08" else 0,
+    #"year_month_2024-06": 1 if year_month == "2024-06" else 0,
     "total_visits": total_visits,
     "avg_days_between_pickups": avg_days_between_pickups,
-    "days_since_last_pickup": days_since_last_pickup,
-       # "month": month,
+    #"days_since_last_pickup": days_since_last_pickup,
+    "month": month,
         
     }
     
