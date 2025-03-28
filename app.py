@@ -8,12 +8,14 @@ from PIL import Image
 @st.cache_resource
 def load_model():
     try:
-        return joblib.load("model_top5.pkl")  # Load the updated model
+        model = joblib.load("model_top5.pkl")  # Load the updated model
+        scaler = joblib.load("scaler.pkl")  # Load the scaler
+        return model, scaler
     except Exception as e:
-        st.error(f"Error loading model: {e}")
-        return None
+        st.error(f"Error loading model or scaler: {e}")
+        return None, None
 
-model = load_model()
+model, scaler = load_model()
 
 # Define only the top 5 features
 REQUIRED_COLUMNS = [
@@ -22,7 +24,6 @@ REQUIRED_COLUMNS = [
     "avg_days_between_pickups",
     "month",
     "days_since_last_pickup"
-   
 ]
 
 # Function to preprocess input data
@@ -36,6 +37,7 @@ def preprocess_input(input_data):
 
     # Ensure the column order matches model training
     input_df = input_df[REQUIRED_COLUMNS]
+
     return input_df
 
 # Insights Page 1: Power BI Visualization
@@ -74,12 +76,18 @@ def predictions_page():
 
     # Prediction button
     if st.button("Predict"):
-        if model is None:
-            st.error("Model not loaded. Please check if 'model_top5.pkl' exists.")
+        if model is None or scaler is None:
+            st.error("Model or scaler not loaded. Please check if 'model_top5.pkl' and 'scaler.pkl' exist.")
         else:
+            # Preprocess input data
             input_df = preprocess_input(input_data)
-            prediction = model.predict(input_df)
-            probability = model.predict_proba(input_df)
+
+            # Scale the input data using the loaded scaler
+            input_scaled = scaler.transform(input_df)
+
+            # Make the prediction using the scaled data
+            prediction = model.predict(input_scaled)
+            probability = model.predict_proba(input_scaled)
 
             st.subheader("Prediction Result:")
             st.write("✅ Prediction: **Yes**" if prediction[0] == 1 else "❌ Prediction: **No**")
