@@ -24,7 +24,7 @@ model = load_model()
 REQUIRED_COLUMNS = [
     "month",
     "total_visits",
-    "avg_days_between_pickups",
+    "avg_days_between_pickups"
     #"days_since_last_pickup"
 
 ]
@@ -191,7 +191,7 @@ def predictions_page():
         
     with col2:
         avg_days_between_pickups = st.number_input("Avg Days Between Pickups", 
-                                                min_value=1.0, max_value=100.0, 
+                                                min_value=1.0, max_value=100.0,
                                                 step=0.1, value=30.0)
         #days_since_last_pickup = st.number_input("Days Since Last Pickup", 
                                                 min_value=1.0, max_value=100.0, 
@@ -201,7 +201,7 @@ def predictions_page():
     input_data = {
         "month": month,
         "total_visits": total_visits,
-        "avg_days_between_pickups": avg_days_between_pickups,
+        "avg_days_between_pickups": avg_days_between_pickups
         #"days_since_last_pickup": days_since_last_pickup,
        
     }
