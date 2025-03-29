@@ -195,7 +195,7 @@ def predictions_page():
                                                 step=0.1, value=30.0)
         days_since_last_pickup = st.number_input("Days Since Last Pickup", 
                                                 min_value=1.0, max_value=100.0, 
-                                                step=0.1, value=30.0),
+                                                step=0.1, value=30.0)
       
     
     input_data = {
