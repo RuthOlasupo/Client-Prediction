@@ -11,7 +11,7 @@ from sklearn.inspection import PartialDependenceDisplay
 @st.cache_resource
 def load_model():
     try:
-        model = joblib.load("model_top4.pkl")
+        model = joblib.load("model_top5.pkl")
         st.success("✅ Model loaded successfully!")
         return model
     except Exception as e:
@@ -25,7 +25,7 @@ REQUIRED_COLUMNS = [
     "month",
     "total_visits",
     "avg_days_between_pickups",
-    "days_since_last_pickup"
+    #"days_since_last_pickup"
 
 ]
 
@@ -60,7 +60,7 @@ def exploratory_data_analysis():
 
 def show_shap_analysis(input_df, prediction, probability):
     st.subheader("🔍 Prediction Explanation")
-    print(model.named_steps) 
+    #print(model.named_steps) 
     # Get the preprocessor and classifier from the pipeline
     preprocessor = model.named_steps['preprocessor']
     classifier = model.named_steps['classifier']
@@ -193,7 +193,7 @@ def predictions_page():
         avg_days_between_pickups = st.number_input("Avg Days Between Pickups", 
                                                 min_value=1.0, max_value=100.0, 
                                                 step=0.1, value=30.0)
-        days_since_last_pickup = st.number_input("Days Since Last Pickup", 
+        #days_since_last_pickup = st.number_input("Days Since Last Pickup", 
                                                 min_value=1.0, max_value=100.0, 
                                                 step=0.1, value=30.0)
       
@@ -202,7 +202,7 @@ def predictions_page():
         "month": month,
         "total_visits": total_visits,
         "avg_days_between_pickups": avg_days_between_pickups,
-        "days_since_last_pickup": days_since_last_pickup,
+        #"days_since_last_pickup": days_since_last_pickup,
        
     }
     # Prediction button
