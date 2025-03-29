@@ -60,7 +60,7 @@ def exploratory_data_analysis():
 
 def show_shap_analysis(input_df, prediction, probability):
     st.subheader("🔍 Prediction Explanation")
-    
+    print(model.named_steps) 
     # Get the preprocessor and classifier from the pipeline
     preprocessor = model.named_steps['preprocessor']
     classifier = model.named_steps['classifier']
