@@ -2,10 +2,18 @@ import streamlit as st
 import pandas as pd
 import joblib
 import numpy as np
-import shap
 import matplotlib.pyplot as plt
 import plotly.express as px
+import plotly.graph_objects as go
 from sklearn.inspection import PartialDependenceDisplay
+
+# Check for SHAP library
+try:
+    import shap
+    SHAP_AVAILABLE = True
+except ImportError:
+    SHAP_AVAILABLE = False
+    st.warning("SHAP library not installed. Some explanation features will be limited.")
 
 # Load the trained model with caching
 @st.cache_resource
@@ -13,6 +21,15 @@ def load_model():
     try:
         model = joblib.load("model_top5.pkl")
         st.success("✅ Model loaded successfully!")
+        
+        # Debug: Show model structure
+        if st.session_state.get('debug', False):
+            st.write("Model type:", type(model))
+            if hasattr(model, 'named_steps'):
+                st.write("Pipeline steps:", list(model.named_steps.keys()))
+            if hasattr(model, 'feature_importances_'):
+                st.write("Model has feature_importances_ attribute")
+        
         return model
     except Exception as e:
         st.error(f"❌ Error loading model: {e}")
@@ -20,24 +37,12 @@ def load_model():
 
 model = load_model()
 
-# Define only the top 4 features
+# Define only the top 5 features
 REQUIRED_COLUMNS = [
-    "month",
     "total_visits",
-    "avg_days_between_pickups"
-    #"days_since_last_pickup"
-
+    "month",
+    "avg_days_between_pickups",
 ]
-
-# Initialize SHAP explainer
-@st.cache_resource
-def load_explainer(model):
-    try:
-        explainer = shap.TreeExplainer(model.named_steps['classifier'])
-        return explainer
-    except Exception as e:
-        st.error(f"❌ Error creating explainer: {e}")
-        return None
 
 # Function to preprocess input data
 def preprocess_input(input_data):
@@ -58,95 +63,127 @@ def exploratory_data_analysis():
     powerbi_url = "https://app.powerbi.com/view?r=eyJrIjoiMTE4Y2JiYWQtMzNhYS00NGFiLThmMDQtMmIwMDg4YTIzMjI5IiwidCI6ImUyMjhjM2RmLTIzM2YtNDljMy05ZDc1LTFjZTI4NWI1OWM3OCJ9"
     st.components.v1.iframe(powerbi_url, width=800, height=600)
 
+def get_model_components():
+    """Extract model components handling different pipeline structures"""
+    components = {
+        'preprocessor': None,
+        'classifier': None,
+        'feature_names': REQUIRED_COLUMNS
+    }
+    
+    if hasattr(model, 'named_steps'):
+        # Handle pipeline models
+        possible_preprocessor_names = ['preprocessor', 'pre', 'transform', 'features']
+        possible_classifier_names = ['classifier', 'model', 'clf', 'estimator']
+        
+        for name in possible_preprocessor_names:
+            if name in model.named_steps:
+                components['preprocessor'] = model.named_steps[name]
+                break
+                
+        for name in possible_classifier_names:
+            if name in model.named_steps:
+                components['classifier'] = model.named_steps[name]
+                break
+    else:
+        # Handle non-pipeline models
+        components['classifier'] = model
+    
+    # Get feature names if preprocessor exists
+    if components['preprocessor'] is not None and hasattr(components['preprocessor'], 'get_feature_names_out'):
+        components['feature_names'] = [name.split('__')[-1] for name in components['preprocessor'].get_feature_names_out()]
+    
+    return components
+
 def show_shap_analysis(input_df, prediction, probability):
+    if not SHAP_AVAILABLE:
+        st.warning("""
+        **SHAP explanations unavailable**  
+        To enable full explanation features, please install SHAP:  
+        `pip install shap` or restart the app in an environment with SHAP installed.
+        """)
+        return
+        
     st.subheader("🔍 Prediction Explanation")
-    #print(model.named_steps) 
-    # Get the preprocessor and classifier from the pipeline
-    preprocessor = model.named_steps['preprocessor']
-    classifier = model.named_steps['classifier']
     
-    # Process input data
-    X_processed = preprocessor.transform(input_df)
-    feature_names = [name.split('__')[-1] for name in preprocessor.get_feature_names_out()]
+    try:
+        components = get_model_components()
+        classifier = components['classifier']
+        
+        if classifier is None:
+            st.error("Could not identify classifier in model pipeline")
+            return
+            
+        # Process input data
+        if components['preprocessor'] is not None:
+            X_processed = components['preprocessor'].transform(input_df)
+        else:
+            X_processed = input_df.values
+            
+        feature_names = components['feature_names']
+        
+        # Convert to dense if sparse
+        if hasattr(X_processed, 'toarray'):
+            X_processed = X_processed.toarray()
+        
+        # Create SHAP explainer
+        explainer = shap.TreeExplainer(classifier)
+        shap_values = explainer.shap_values(X_processed)
+        
+        # For binary classification
+        if isinstance(shap_values, list) and len(shap_values) == 2:
+            shap_values = shap_values[1]
+        
+        # Create tabs for different visualizations
+        tab1, tab2 = st.tabs(["Feature Importance", "Prediction Breakdown"])
+        
+        with tab1:
+            st.write("**Global Feature Importance**")
+            fig, ax = plt.subplots(figsize=(10, 6))
+            shap.summary_plot(shap_values, X_processed, feature_names=feature_names, plot_type="bar", show=False)
+            plt.tight_layout()
+            st.pyplot(fig)
+            st.caption("This shows which features most influence model predictions overall.")
+        
+        with tab2:
+            st.write("**How Each Feature Contributed to This Prediction**")
+            
+            # Create waterfall plot
+            base_value = explainer.expected_value
+            contribution = shap_values[0]
+            
+            # Create dataframe for plot
+            df_waterfall = pd.DataFrame({
+                'Feature': ['Base Value'] + feature_names,
+                'SHAP Value': [base_value] + list(contribution)
+            })
+            
+            # Color based on positive/negative contribution
+            df_waterfall['Color'] = df_waterfall['SHAP Value'].apply(
+                lambda x: 'Positive' if x > 0 else 'Negative')
+            
+            fig = px.bar(df_waterfall, 
+                        x='SHAP Value', 
+                        y='Feature', 
+                        color='Color',
+                        color_discrete_map={'Positive': '#FF0051', 'Negative': '#008BFB'},
+                        orientation='h',
+                        title=f"Feature Contributions to Prediction")
+            
+            # Add base value line
+            fig.add_vline(x=base_value, line_dash="dash", line_color="gray")
+            fig.update_layout(showlegend=False)
+            
+            st.plotly_chart(fig, use_container_width=True)
+            
+            # Show feature values
+            st.write("**Feature Values for This Prediction:**")
+            feature_values = {f: v for f, v in zip(feature_names, X_processed[0])}
+            st.json(feature_values)
     
-    # Convert to dense if sparse
-    if hasattr(X_processed, 'toarray'):
-        X_processed = X_processed.toarray()
-    
-    # Create SHAP explainer
-    explainer = shap.TreeExplainer(classifier)
-    shap_values = explainer.shap_values(X_processed)
-    
-    # For binary classification
-    if isinstance(shap_values, list) and len(shap_values) == 2:
-        shap_values = shap_values[1]
-    
-    # Create tabs for different visualizations
-    tab1, tab2, tab3 = st.tabs(["Feature Importance", "Prediction Breakdown", "Feature Effects"])
-    
-    with tab1:
-        st.write("**Global Feature Importance**")
-        fig, ax = plt.subplots(figsize=(10, 6))
-        shap.summary_plot(shap_values, X_processed, feature_names=feature_names, plot_type="bar", show=False)
-        plt.tight_layout()
-        st.pyplot(fig)
-        st.caption("This shows which features most influence model predictions overall.")
-    
-    with tab2:
-        st.write("**How Each Feature Contributed to This Prediction**")
-        
-        # Create waterfall plot
-        base_value = explainer.expected_value
-        contribution = shap_values[0]
-        pred_value = base_value + contribution.sum()
-        
-        # Create dataframe for plot
-        df_waterfall = pd.DataFrame({
-            'Feature': ['Base Value'] + feature_names + ['Prediction'],
-            'Contribution': [base_value] + list(contribution) + [0],
-            'Cumulative': [base_value] + list(np.cumsum([base_value] + list(contribution))[1:]) + [pred_value]
-        })
-        
-        # Color based on positive/negative contribution
-        df_waterfall['Color'] = df_waterfall['Contribution'].apply(
-            lambda x: 'Positive' if x > 0 else 'Negative')
-        
-        fig = px.bar(df_waterfall, 
-                    x='Contribution', 
-                    y='Feature', 
-                    color='Color',
-                    color_discrete_map={'Positive': '#FF0051', 'Negative': '#008BFB'},
-                    orientation='h',
-                    hover_data={'Cumulative': ':.4f'},
-                    title=f"Prediction: {'Return' if prediction[0] == 1 else 'No Return'} (Probability: {probability[0][1]:.2%})")
-        
-        # Add base value and prediction lines
-        fig.add_vline(x=base_value, line_dash="dash", line_color="gray")
-        fig.add_vline(x=0.5, line_dash="dot", line_color="black")
-        
-        st.plotly_chart(fig, use_container_width=True)
-        
-        # Show feature values
-        st.write("**Feature Values for This Prediction:**")
-        feature_values = {f: v for f, v in zip(feature_names, X_processed[0])}
-        st.json(feature_values)
-    
-    with tab3:
-        st.write("**How Changing Features Affects Prediction**")
-        selected_feature = st.selectbox("Select feature to analyze", feature_names)
-        
-        fig, ax = plt.subplots(figsize=(10, 6))
-        PartialDependenceDisplay.from_estimator(
-            model,
-            input_df,
-            features=[feature_names.index(selected_feature)],
-            feature_names=feature_names,
-            ax=ax
-        )
-        plt.title(f"Partial Dependence Plot for {selected_feature}")
-        plt.tight_layout()
-        st.pyplot(fig)
-        st.caption("This shows how changing this feature would affect the prediction.")
+    except Exception as e:
+        st.error(f"Error generating explanations: {str(e)}")
+        st.warning("Model structure may not be compatible with automatic explanation generation")
 
 def show_confidence_analysis(probability):
     st.subheader("📊 Prediction Confidence")
@@ -186,23 +223,19 @@ def predictions_page():
     # User input fields
     col1, col2 = st.columns(2)
     with col1:
-        month = st.number_input("Month", min_value=1, max_value=12, step=1, value=6)
         total_visits = st.number_input("Total Visits", min_value=1, max_value=100, step=1, value=5)
-        
+        month = st.number_input("Month", min_value=1, max_value=12, step=1, value=6)
     with col2:
         avg_days_between_pickups = st.number_input("Avg Days Between Pickups", 
-                                                min_value=1.0, max_value=100.0,
+                                                min_value=1.0, max_value=100.0, 
                                                 step=0.1, value=30.0)
-        
-      
     
     input_data = {
-        "month": month,
         "total_visits": total_visits,
-        "avg_days_between_pickups": avg_days_between_pickups
-        #"days_since_last_pickup": days_since_last_pickup,
-       
+        "avg_days_between_pickups": avg_days_between_pickups,
+        "month": month,
     }
+    
     # Prediction button
     if st.button("Predict"):
         if model is None:
@@ -266,6 +299,12 @@ def dashboard():
 def main():
     st.sidebar.title("Navigation")
     app_page = st.sidebar.radio("Choose a page", ["Dashboard", "Insights", "Predictions"])
+    
+    # Debug toggle
+    if st.sidebar.checkbox("Debug mode"):
+        st.session_state.debug = True
+    else:
+        st.session_state.debug = False
 
     if app_page == "Dashboard":
         dashboard()
@@ -278,7 +317,7 @@ def main():
     st.sidebar.markdown("---")
     st.sidebar.markdown("""
     **About This App:**
-    - Uses CatBoost machine learning model
+    - Uses machine learning model
     - Provides explainable AI insights
     - Designed for food bank client retention
     """)
